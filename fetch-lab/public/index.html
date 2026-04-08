@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fetch Lab</title>
+ 
+  <!-- IMPORT BOOTSTRAP HERE! -->
+</head>
+<body class="bg-light">
+  <main class="container py-4">
+    <h1 class="mb-4">Fetch Lab</h1>
+ 
+    <section id="hello-section" class="card mb-4">
+      <div class="card-body">
+        <h2 class="h4">1. Hello (text response)</h2>
+        <button id="hello-btn" class="btn btn-primary">Fetch /hello</button>
+        <div id="hello-result" class="alert alert-secondary mt-3 mb-0" role="alert">
+          Click the button...
+        </div>
+      </div>
+    </section>
+    <section id="time-section" class="card mb-4">
+      <div class="card-body">
+        <h2 class="h4">1. Time (json response)</h2>
+        <button id="time-btn" class="btn btn-primary">Fetch /api/time</button>
+        <div id="time-result" class="alert alert-secondary mt-3 mb-0" role="alert">
+          Click the button...
+        </div>
+      </div>
+    </section>
+    <section id="greet-section" class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4">2. Greet (json response)</h2>
+
+            <div class="mb-2">
+                <input
+                    type="text"
+                    id="name-input"
+                    class="form-control"
+                    placeholder="Enter your name"
+                />
+            </div>
+
+            <button id="greet-btn" class="btn btn-primary">
+                Fetch /api/greet/{name}
+            </button>
+
+            <div
+            id="greet-result"
+            class="alert alert-secondary mt-3 mb-0"
+            role="alert"
+            >
+            Enter a name and click the button...
+            </div>
+        </div>
+    </section>
+    <section id="slow-section" class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4">3. Slow (delayed json response)</h2>
+
+            <button id="slow-btn" class="btn btn-primary">
+            Fetch /api/slow
+            </button>
+
+            <div
+            id="slow-result"
+            class="alert alert-secondary mt-3 mb-0"
+            role="alert"
+            >
+            Click the button...
+            </div>
+        </div>
+    </section>
+    <section id="unreliable-section" class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4">4. Unreliable (flaky endpoint)</h2>
+
+            <button id="unreliable-btn" class="btn btn-primary">
+            Fetch /api/unreliable
+            </button>
+
+            <div
+            id="unreliable-result"
+            class="alert alert-secondary mt-3 mb-0"
+            role="alert"
+            >
+            Click the button multiple times to see successes and errors...
+            </div>
+        </div>
+    </section>
+    <section id="messages-section" class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4">5. Messages (POST + GET)</h2>
+
+            <div class="mb-2">
+            <input
+                type="text"
+                id="msg-author"
+                class="form-control"
+                placeholder="Author"
+            />
+            </div>
+
+            <div class="mb-2">
+            <input
+                type="text"
+                id="msg-text"
+                class="form-control"
+                placeholder="Message text"
+            />
+            </div>
+
+            <button id="msg-btn" class="btn btn-primary">
+            Post Message
+            </button>
+
+            <div
+            id="msg-result"
+            class="alert alert-secondary mt-3 mb-0"
+            role="alert"
+            >
+            Submit a message to see results...
+            </div>
+
+            <ul id="msg-list" class="list-group mt-3"></ul>
+        </div>
+    </section>
+    <section id="classmate-section" class="card mb-4">
+        <div class="card-body">
+            <h2 class="h4">6. Classmate API (cross-origin)</h2>
+
+            <div class="mb-2">
+            <input
+                type="text"
+                id="classmate-url"
+                class="form-control"
+                placeholder="Enter classmate base URL (e.g. https://xyz.github.dev)"
+            />
+            </div>
+
+            <div class="mb-2">
+            <button class="btn btn-primary me-2"
+                onclick="fetchFromClassmate('/hello')">
+                GET /hello
+            </button>
+
+            <button class="btn btn-primary me-2"
+                onclick="fetchFromClassmate('/api/time')">
+                GET /api/time
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="fetchFromClassmate('/api/unreliable')">
+                GET /api/unreliable
+            </button>
+            </div>
+
+            <pre
+            id="classmate-result"
+            class="alert alert-secondary mt-3 mb-0"
+            role="alert"
+            >
+        Enter a URL and click a button...
+            </pre>
+        </div>
+    </section>
+    <!-- You will add more sections below -->
+    <script>
+        // Put this near the top of your <script> tag
+        function statusCheck(response) {
+        if (response.ok) return response;
+        // Try to read JSON error bodies like { error: "..." }
+        return response.json()
+            .then(errData => {
+            const msg = errData.error || ('HTTP ' + response.status);
+            throw new Error(msg);
+            })
+            .catch(() => {
+            // If the response wasn’t JSON, fall back to a generic message
+            throw new Error('HTTP ' + response.status);
+            });
+        }
+        document.getElementById('hello-btn')
+        .addEventListener('click', () => {
+            fetch('/hello')
+            .then(statusCheck)
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('hello-result').textContent = text;
+            })
+            .catch(error => {
+                document.getElementById('hello-result').textContent = 'Error: ' + error.message;
+            });
+        })
+        document.getElementById('time-btn')
+        .addEventListener('click', async () => {
+            try{
+                const response = await fetch('/api/time');
+                const data = await response.json();
+
+                const message = data.message;
+                const currentTime = data.currentTime;
+
+                document.getElementById('time-result').textContent =
+                    `${message}: ${currentTime}`;
+            }
+             catch(error) {
+                document.getElementById('time-result').textContent = 'Error: ' + error.message;
+            }
+        });
+
+        document.getElementById('greet-btn')
+    .addEventListener('click', () => {
+        const name = document.getElementById('name-input').value;
+
+        fetch('/api/greet/' + name)
+        .then(statusCheck)
+        .then(response => response.json())
+        .then(data => {
+            const greeting = data.greeting;
+
+            document.getElementById('greet-result').textContent =
+                greeting;
+        })
+        .catch(error => {
+            document.getElementById('greet-result').textContent =
+                'Error: ' + error.message;
+        });
+    });
+
+    document.getElementById('slow-btn')
+    .addEventListener('click', () => {
+        const resultDiv = document.getElementById('slow-result');
+
+        // Show loading state
+        resultDiv.textContent = 'Loading... please wait';
+        resultDiv.className = 'alert alert-secondary mt-3 mb-0';
+
+        fetch('/api/slow')
+        .then(statusCheck)
+        .then(response => response.json())
+        .then(data => {
+            resultDiv.textContent = data.message;
+            resultDiv.className = 'alert alert-success mt-3 mb-0';
+        })
+        .catch(error => {
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'alert alert-danger mt-3 mb-0';
+        });
+    });
+
+    document.getElementById('unreliable-btn')
+    .addEventListener('click', async () => {
+        const resultDiv = document.getElementById('unreliable-result');
+        resultDiv.textContent = 'Loading... please wait';
+        resultDiv.className = 'alert alert-secondary mt-3 mb-0';
+
+        try {
+            const response = await fetch('/api/unreliable');
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error);
+            }
+            const data = await response.json();
+            let output = data.message;
+            if (data.luckyNumber !== undefined) {
+                output += ` (Lucky number: ${data.luckyNumber})`;
+            }
+            resultDiv.textContent = output;
+            resultDiv.className = 'alert alert-success mt-3 mb-0';
+
+        } catch (error) {
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'alert alert-danger mt-3 mb-0';
+        }
+    });
+
+    async function postMessage() {
+
+        const text = document.getElementById('msg-text').value;
+        const author = document.getElementById('msg-author').value;
+        document.getElementById('msg-text').value = '';
+        document.getElementById('msg-author').value = '';
+        try {
+            const response = await fetch('/api/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text, author })
+            });
+        
+            if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error);
+            }
+        
+            const newMsg = await response.json();
+            const resultTxt = document.getElementById('msg-result');
+            resultTxt.textContent = `Posted successfully`;
+            resultTxt.className = 'alert alert-success mt-3 mb-0';
+            const resultList = document.getElementById('msg-list'); 
+
+            resultList.innerHTML = '';
+
+            newMsg.forEach(msg => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = `${msg.text} — ${msg.author}`;
+                resultList.appendChild(li);
+            });
+        } catch (error) {
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'alert alert-danger mt-3 mb-0';
+        }
+    }
+    
+    document.getElementById('msg-btn')
+    .addEventListener('click', async () => {
+        await postMessage()
+    });
+    async function fetchFromClassmate(endpoint) {
+        const baseUrl = document.getElementById('classmate-url').value;
+        const resultDiv = document.getElementById('classmate-result');
+
+        // Build full URL
+        const url = baseUrl + endpoint;
+
+        resultDiv.textContent = 'Loading...';
+        resultDiv.className = 'alert alert-secondary mt-3 mb-0';
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || 'Request failed');
+            }
+
+            const data = await response.json();
+
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+            resultDiv.className = 'alert alert-success mt-3 mb-0';
+
+        } catch (error) {
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'alert alert-danger mt-3 mb-0';
+        }
+    }
+    </script>
+  </main>
+</body>
+</html>

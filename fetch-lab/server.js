@@ -14,16 +14,6 @@ app.use(express.static('public'));
 // Parse JSON request bodies (needed for POST)
 app.use(express.json());
  
-// ---- Your endpoints go below this line ----
- 
- 
- 
-// ---- Your endpoints go above this line ----
- 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
 app.get('/hello', (req, res) => {
   res.type('text').send('Hello from the server!');
@@ -126,6 +116,12 @@ app.post('/api/messages', (req, res) => {
     messages.push(newMessage);
 
     res.status(201).json(messages);
+});
+
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 
