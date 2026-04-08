@@ -124,6 +124,12 @@
             </div>
 
             <ul id="msg-list" class="list-group mt-3"></ul>
+
+            <h6>Test Webhook</h6>
+            <button id="webhook-btn" class="btn btn-secondary ms-2">
+                Send to Webhook
+                (https://app.hooklistener.com/)
+            </button>
         </div>
     </section>
     <section id="classmate-section" class="card mb-4">
@@ -135,7 +141,7 @@
                 type="text"
                 id="classmate-url"
                 class="form-control"
-                placeholder="Enter classmate base URL (e.g. https://xyz.github.dev)"
+                placeholder="Enter classmate base URL (e.g. https://abab8080.github.dev)"
             />
             </div>
 
@@ -311,21 +317,58 @@
                 li.textContent = `${msg.text} — ${msg.author}`;
                 resultList.appendChild(li);
             });
+
         } catch (error) {
             resultDiv.textContent = 'Error: ' + error.message;
             resultDiv.className = 'alert alert-danger mt-3 mb-0';
         }
     }
-    
     document.getElementById('msg-btn')
     .addEventListener('click', async () => {
         await postMessage()
     });
+
+    async function sendToWebhook() {
+        const text = document.getElementById('msg-text').value;
+        const author = document.getElementById('msg-author').value;
+        const resultDiv = document.getElementById('msg-result');
+
+        resultDiv.textContent = 'Sending to webhook...';
+        resultDiv.className = 'alert alert-secondary mt-3 mb-0';
+
+        try {
+            const response = await fetch(
+            'https://app.hooklistener.com/w/my-first-endpoint-joz',
+            {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text, author })
+            }
+            );
+
+            if (!response.ok) {
+            throw new Error('Webhook request failed');
+            }
+
+            resultDiv.textContent = 'Sent to webhook successfully!';
+            resultDiv.className = 'alert alert-success mt-3 mb-0';
+
+        } catch (error) {
+            resultDiv.textContent = 'Error: ' + error.message;
+            resultDiv.className = 'alert alert-danger mt-3 mb-0';
+        }
+    }
+    document.getElementById('webhook-btn')
+    .addEventListener('click', async () => {
+        await sendToWebhook()
+    });
+    
     async function fetchFromClassmate(endpoint) {
         const baseUrl = document.getElementById('classmate-url').value;
         const resultDiv = document.getElementById('classmate-result');
 
-        // Build full URL
         const url = baseUrl + endpoint;
 
         resultDiv.textContent = 'Loading...';
